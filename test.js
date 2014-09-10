@@ -1,7 +1,7 @@
 $(function () {
-    Backbone.sync = function (a,b,c) {
-        c();
-    }
+    //Backbone.sync = function (a,b,c) {
+        //c();
+    //}
     var Item = Backbone.Model.extend({
         defaults: function () {
             return {
@@ -12,6 +12,13 @@ $(function () {
     });
     var List = Backbone.Collection.extend({
         model: Item
+        ,localStorage: new Backbone.LocalStorage("bbTest")
+        ,nextId: function () {
+            if (!this.length) {
+                return 1 ;
+            }
+            return this.last().get('id') + 1 ;
+        }
     });
 
     var ItemView = Backbone.View.extend({
@@ -39,10 +46,12 @@ $(function () {
 
         //data operation
         ,data_swap:function () {
-            this.model.set({
+            //set changed to save
+            this.model.save({
                 name: this.model.get('order')
                 ,order: this.model.get('name')
-            })   
+            });
+
         }
         ,data_remove: function () {
             this.model.destroy();
@@ -56,8 +65,10 @@ $(function () {
             'click #add': 'addItem'
         }
         ,initialize: function () {
-            _.bindAll(this, 'render', 'addItem', 'appendItem');
+            //_.bindAll(this, 'render', 'addItem', 'appendItem');
             this.collection =  new List();
+            this.collection.fetch();
+            //TODO 隐式传递了单个model参数？
             this.listenTo(this.collection, 'add', this.appendItem);
 
             this.counter = 0 ;
@@ -74,9 +85,11 @@ $(function () {
 
         ,addItem: function () {
             this.counter++;
-            this.collection.add({
-                name: 'Alex'
-                ,order: 'order is ' + this.counter
+            var order = this.collection.nextId();
+            this.collection.create({
+                id: order
+                ,name: 'Alex'
+                ,order: 'order is ' + order
             });
         }
 
