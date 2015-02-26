@@ -1,18 +1,19 @@
 $(function () {
-    //model single data model?
-    var Todo = Backbone.Model.extend({
+    //data mode
+    //为collection提供数据
+    var mTodo = Backbone.Model.extend({
         defaults: function () {
             return {
                 title: "empty todo...",
-                order: Todos.nextOrder(),
+                order: cTodo.nextOrder(),
                 done: false
             };
         }
     });
 
-    //collection: multiple data? obj ?
-    var TodoList = Backbone.Collection.extend({
-        model: Todo,
+    //数据以及数据的处理
+    var cTodoOrg = Backbone.Collection.extend({
+        model: mTodo,
         localStorage: new Backbone.LocalStorage("todos-backbone"),
 
         done: function () {
@@ -34,9 +35,12 @@ $(function () {
 
         comparator: 'order'
     });
+    //collection可以被model和view调用
+    var cTodo = new cTodoOrg;
+    // console.log(cTodoOrg) ;
+    //console.log(cTodo) ;
 
-    var Todos = new TodoList;
-    // console.debug(Todos)
+    //单个列表项的view
     var TodoView = Backbone.View.extend({
         tagName: "li",
         template: _.template($('#itemTpl').html()),
@@ -49,6 +53,7 @@ $(function () {
         },
 
         initialize: function () {
+            //如果model层有变化，则调整view层
             this.listenTo(this.model, 'change', this.render);
             this.listenTo(this.model, 'destroy', this.remove);
         },
@@ -90,9 +95,9 @@ $(function () {
         clear: function () {
             this.model.destroy();
         }
-
     });
 
+    //整个app的view
     var AppView = Backbone.View.extend({
         el: $("#todoapp"),
         statsTemplate: _.template($('#infoTpl').html()),
@@ -107,23 +112,25 @@ $(function () {
             this.input = this.$("#newItem");
             this.allCheckbox = this.$("#toggleAll")[0];
 
-            this.listenTo(Todos, 'add', this.addOne);
-            this.listenTo(Todos, 'reset', this.addAll);
-            this.listenTo(Todos, 'all', this.render);
+            //这里监听collection(数据)
+            // 初始化怎么会调用到这个方法？
+            this.listenTo(cTodo, 'add', this.addOne);
+            this.listenTo(cTodo, 'reset', this.addAll);
+            this.listenTo(cTodo, 'all', this.render);
 
             this.footer = this.$('footer');
             this.main = $('#main');
 
-            Todos.fetch();
+            cTodo.fetch();
         },
 
         // Re-rendering the App just means refreshing the statistics -- the rest
         // of the app doesn't change.
         render: function () {
-            var done = Todos.done().length;
-            var remaining = Todos.remaining().length;
+            var done = cTodo.done().length;
+            var remaining = cTodo.remaining().length;
 
-            if (Todos.length) {
+            if (cTodo.length) {
                 this.main.show();
                 this.footer.show();
                 this.footer.html(this.statsTemplate({
@@ -138,17 +145,17 @@ $(function () {
             this.allCheckbox.checked = !remaining;
         },
 
-        // todo是哪里传来的参数
         addOne: function (todo) {
+            //初始化view是需要传递model
             var view = new TodoView({
                 model: todo
             });
             this.$("#todoList").append(view.render().el);
         },
 
-        // Add all items in the **Todos** collection at once.
+        // Add all items in the **cTodo** collection at once.
         addAll: function () {
-            Todos.each(this.addOne, this);
+            cTodo.each(this.addOne, this);
         },
 
         // If you hit return in the main input field, create new **Todo** model,
@@ -157,7 +164,8 @@ $(function () {
             if (e.keyCode != 13) return;
             if (!this.input.val()) return;
 
-            Todos.create({
+            //collection实例的自带方法
+            cTodo.create({
                 title: this.input.val()
             });
             this.input.val('');
@@ -165,13 +173,13 @@ $(function () {
 
         // Clear all done todo items, destroying their models.
         clearCompleted: function () {
-            _.invoke(Todos.done(), 'destroy');
+            _.invoke(cTodo.done(), 'destroy');
             return false;
         },
 
         toggleAllComplete: function () {
             var done = this.allCheckbox.checked;
-            Todos.each(function (todo) {
+            cTodo.each(function (todo) {
                 todo.save({
                     'done': done
                 });
