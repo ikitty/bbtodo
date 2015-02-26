@@ -113,7 +113,7 @@ $(function () {
             this.allCheckbox = this.$("#toggleAll")[0];
 
             //这里监听collection(数据)
-            // 初始化怎么会调用到这个方法？
+            // cTodo.fetch会触发add
             this.listenTo(cTodo, 'add', this.addOne);
             this.listenTo(cTodo, 'reset', this.addAll);
             this.listenTo(cTodo, 'all', this.render);
