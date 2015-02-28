@@ -76,12 +76,10 @@ $(function () {
         name: 'kata'
         ,age: 18
     });
-    katarina.save();
-
+    //katarina.save();
     //katarina.fetch();
     //katarina.destroy();
 
-    console.log(katarina) ;
 
 
     var Children = Backbone.Collection.extend({
