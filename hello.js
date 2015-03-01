@@ -69,14 +69,15 @@ $(function () {
     //###数据同步
     //todo test
     var Girl = Backbone.Model.extend({
-        urlRoot: 'http://localhost:3002'
+        urlRoot: 'http://localhost:8080/man/'
         //localStorage: new Backbone.LocalStorage("bbhello")
     });
     var katarina = new Girl({
         name: 'kata'
+        ,id: 111
         ,age: 18
     });
-    //katarina.save();
+    katarina.save();
     //katarina.fetch();
     //katarina.destroy();
 
@@ -84,17 +85,98 @@ $(function () {
 
     var Children = Backbone.Collection.extend({
         model: Child
-        ,localStorage: new Backbone.LocalStorage("bbChild")
+        //,localStorage: new Backbone.LocalStorage("bbChild")
         //,comperator: age
     });
 
-    var annies = new Children([
-        {
-            name: 'apple', age: 5
-        }
-        ,{
-            name: 'pear', age: 5
-        }
-    ]);
+    var models = [{  
+        name : "Jim"
+    }, {  
+        name : "Riven"
+    }];  
+    // 创建集合对象  
+    var heros = new Children(models);  
+
+    console.log('init collection:');
+    _.each(heros.models, function (item, i) {
+        console.log(item.attributes);
+    })
+
+    heros.add({
+        name: 'Vi'   
+    });
+    heros.push({
+        name: 'Lucy'   
+    });
+    heros.unshift({
+        name: 'Mike'   
+    });
+    heros.push({
+        name: 'Lily'   
+    }, {
+        at: 1   
+    });
+
+    console.log('After add add:');
+    _.each(heros.models, function (item, i) {
+        console.log(item.get('name'));
+    })
+
+    //delete model from collection
+    heros.remove(heros.models[1]);
+    heros.pop();
+    heros.shift();
+
+    console.log('After remove data :');
+    _.each(heros.models, function (item, i) {
+        console.log(item.get('name'));
+    })
+
+
+    //test find model
+    heros.add({name: 'Spada', id: 100});
+    console.log(heros.get(100))
+    console.log(heros.at(1))
+    //find by filter
+    console.log(heros.where({name: 'Vi'}))
+
+
+    //test comparator
+    var Girls = Backbone.Collection.extend({
+        model: Child
+        ,comparator: 'age'
+    });
+    var xgirl_models = [{
+        name: 'dora'
+        ,age:19
+    },{
+        name: 'winnie'
+        ,age:18
+    }];
+    var xgirl = new Girls(xgirl_models);
+
+    console.log('test comparator:');
+    _.each(xgirl.models, function (item, i) {
+        console.log(item.attributes);
+    })
+
+    //fetch data from server for collection
+    var Boys = Backbone.Collection.extend({
+        model: Child
+        ,url: 'http://localhost:8080/boy/'
+    });
+    var xboy = new Boys([{
+        name: 'Yi'
+    }]);
+
+    // 要在回调中才能获取到值
+    xboy.fetch({
+        remove: false
+        ,success: function(collection, resp) {  
+            console.log('test fetch:');
+            console.log(collection.models);  
+        }  
+    });
+
 
 });
