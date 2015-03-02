@@ -1,19 +1,16 @@
 $(function () {
-    //data mode
-    //为collection提供数据
-    var mTodo = Backbone.Model.extend({
+    var Todo = Backbone.Model.extend({
         defaults: function () {
             return {
                 title: "empty todo...",
-                order: cTodo.nextOrder(),
+                order: myTodolist.nextOrder(),
                 done: false
             };
         }
     });
 
-    //数据以及数据的处理
-    var cTodoOrg = Backbone.Collection.extend({
-        model: mTodo,
+    var Todolist = Backbone.Collection.extend({
+        model: Todo,
         localStorage: new Backbone.LocalStorage("todos-backbone"),
 
         done: function () {
@@ -35,10 +32,7 @@ $(function () {
 
         comparator: 'order'
     });
-    //collection可以被model和view调用
-    var cTodo = new cTodoOrg;
-    // console.log(cTodoOrg) ;
-    //console.log(cTodo) ;
+    var myTodolist = new Todolist;
 
     //单个列表项的view
     var TodoView = Backbone.View.extend({
@@ -113,24 +107,24 @@ $(function () {
             this.allCheckbox = this.$("#toggleAll")[0];
 
             //这里监听collection(数据)
-            // cTodo.fetch会触发add
-            this.listenTo(cTodo, 'add', this.addOne);
-            this.listenTo(cTodo, 'reset', this.addAll);
-            this.listenTo(cTodo, 'all', this.render);
+            // fetch会触发add
+            this.listenTo(myTodolist, 'add', this.addOne);
+            this.listenTo(myTodolist, 'reset', this.addAll);
+            this.listenTo(myTodolist, 'all', this.render);
 
             this.footer = this.$('footer');
             this.main = $('#main');
 
-            cTodo.fetch();
+            myTodolist.fetch();
         },
 
         // Re-rendering the App just means refreshing the statistics -- the rest
         // of the app doesn't change.
         render: function () {
-            var done = cTodo.done().length;
-            var remaining = cTodo.remaining().length;
+            var done = myTodolist.done().length;
+            var remaining = myTodolist.remaining().length;
 
-            if (cTodo.length) {
+            if (myTodolist.length) {
                 this.main.show();
                 this.footer.show();
                 this.footer.html(this.statsTemplate({
@@ -153,9 +147,8 @@ $(function () {
             this.$("#todoList").append(view.render().el);
         },
 
-        // Add all items in the **cTodo** collection at once.
         addAll: function () {
-            cTodo.each(this.addOne, this);
+            myTodolist.each(this.addOne, this);
         },
 
         // If you hit return in the main input field, create new **Todo** model,
@@ -165,7 +158,7 @@ $(function () {
             if (!this.input.val()) return;
 
             //collection实例的自带方法
-            cTodo.create({
+            myTodolist.create({
                 title: this.input.val()
             });
             this.input.val('');
@@ -173,13 +166,13 @@ $(function () {
 
         // Clear all done todo items, destroying their models.
         clearCompleted: function () {
-            _.invoke(cTodo.done(), 'destroy');
+            _.invoke(myTodolist.done(), 'destroy');
             return false;
         },
 
         toggleAllComplete: function () {
             var done = this.allCheckbox.checked;
-            cTodo.each(function (todo) {
+            myTodolist.each(function (todo) {
                 todo.save({
                     'done': done
                 });
