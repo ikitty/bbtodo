@@ -49,7 +49,11 @@ $(function () {
         initialize: function () {
             //如果model层有变化，则调整view层
             this.listenTo(this.model, 'change', this.render);
-            this.listenTo(this.model, 'destroy', this.remove);
+            this.listenTo(this.model, 'destroy', function () {
+                this.el.remove();
+            });
+            //上面的代码可以简化。调用view自身的remove 方法
+            //this.listenTo(this.model, 'destroy', this.remove);
         },
         render: function () {
             this.$el.html(this.template(this.model.toJSON()));
@@ -59,7 +63,6 @@ $(function () {
         },
 
         toggleDone: function () {
-            //this.model.toggle();
             this.model.save({
                 'done': !this.model.get('done')
             });
@@ -107,11 +110,13 @@ $(function () {
             this.allCheckbox = this.$("#toggleAll")[0];
 
             //这里监听collection(数据)
-            // fetch会触发add
+            // 默认情况下，fetch会调用set方法（而set方法出触发add事件）。
+            // 但设置reest:true选项后，collection将会触发reset事件
             this.listenTo(myTodolist, 'add', this.addOne);
-            this.listenTo(myTodolist, 'reset', this.addAll);
             this.listenTo(myTodolist, 'all', this.render);
-
+            // demo中没有触发reset的场景
+            // this.listenTo(myTodolist, 'reset', this.addAll);
+            
             this.footer = this.$('footer');
             this.main = $('#main');
 
@@ -140,7 +145,6 @@ $(function () {
         },
 
         addOne: function (todo) {
-            //初始化view是需要传递model
             var view = new TodoView({
                 model: todo
             });
@@ -151,13 +155,10 @@ $(function () {
             myTodolist.each(this.addOne, this);
         },
 
-        // If you hit return in the main input field, create new **Todo** model,
-        // persisting it to *localStorage*.
         createOnEnter: function (e) {
             if (e.keyCode != 13) return;
             if (!this.input.val()) return;
 
-            //collection实例的自带方法
             myTodolist.create({
                 title: this.input.val()
             });
