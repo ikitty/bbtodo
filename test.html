@@ -6,30 +6,16 @@
 <link rel="stylesheet" href="index.css"/>
 </head>
 <body>
-test
+
+<h1 >hi backbone</h1>
+
 <script src="lib/json2.js"></script>
 <script src="lib/jquery.js"></script>
 <script src="lib/underscore.js"></script>
 <script src="lib/backbone.js"></script>
 <script src="lib/backbone.localStorage.js"></script>
 
-<script src="test.js"></script>
 <script src="hello.js"></script>
 
-<script type="text/template" id="itemTpl">
-    <div class="view">
-        <input class="toggle" type="checkbox" <%= done ? 'checked="checked"' : '' %> />
-        <label><%- title %></label>
-        <a class="destroy">&#215;</a>
-    </div>
-    <input class="edit" type="text" value="<%- title %>" />
-</script>
-
-<script type="text/template" id="infoTpl">
-    <% if (done) { %>
-        <a id="clearMarked">Clear <%= done %> completed <%= done == 1 ? 'item' : 'items' %></a>
-    <% } %>
-    <div class="remain"><b><%= remaining %></b> <%= remaining == 1 ? 'item' : 'items' %> left</div>
-</script>
 </body>
 </html>

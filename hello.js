@@ -1,3 +1,9 @@
+/**
+ * backbone 测试JS
+ *
+ * @author Alex
+ **/
+
 $(function () {
     var Child = Backbone.Model.extend({
         defaults: function () {
@@ -7,27 +13,30 @@ $(function () {
             } ;
         }
     });
-    //###实例化模型
+    //=============================================
+    //================Model========================
+    //=============================================
+    //实例化模型
     var Jack = new Child({
         name: 'jack'
         ,age: 12
         ,fun: '<b>吃饭</b>'
     });
-    //###获取数据
+    //获取数据
     console.log(Jack.attributes) ;
     console.log(Jack.get('name')) ;
     //escape entities
     console.log(Jack.escape('fun')) ;
 
 
-    //###修改数据
+    //修改数据
     Jack.set({
         age: 13
         ,fun: 'football'
     })
     console.log(Jack.attributes) ;
 
-    //事件监听（change event will be fired when model data was be modified）
+    //事件监听
     Jack.on('change', function (model, value) {
         console.log('model has been changed') ;
     });
@@ -40,14 +49,14 @@ $(function () {
     Jack.set({ age: 14 });
     //从结果可以看到，一个模型发生变化时，带属性的change事件先触发，change事件后触发
 
-    //###删除数据
+    //删除数据
     Jack.unset('age');
     console.log('unset age', Jack.attributes) ;
     Jack.clear();
     console.log('clear all attr', Jack.attributes) ;
 
 
-    //###数据验证validate
+    //数据验证validate
     //validate在数据发生变化前被调用(仅在save时触发，初始化和set不会触发)
     //如果validate验证通过，则会返回undfined；如果不通过，则会返回其他自定义值，此时会触发invalid事件（理解为只要不返回undefined，就会触发invalid）
     var Book = Backbone.Model.extend({
@@ -66,7 +75,7 @@ $(function () {
     //set时需要手动指定validate参数才行
     //jsBook.set({price: 0.5}, {validate:true});
     
-    //###数据同步
+    //数据同步
     //todo test
     var Girl = Backbone.Model.extend({
         urlRoot: 'http://localhost:8080/man/'
@@ -77,16 +86,18 @@ $(function () {
         ,id: 111
         ,age: 18
     });
+    //数据中有ID才能发起GET 或者 delete 请求
     katarina.save();
     //katarina.fetch();
     //katarina.destroy();
 
 
-
+    //=============================================
+    //================Collection===================
+    //=============================================
     var Children = Backbone.Collection.extend({
         model: Child
         //,localStorage: new Backbone.LocalStorage("bbChild")
-        //,comperator: age
     });
 
     var models = [{  
@@ -178,5 +189,53 @@ $(function () {
         }  
     });
 
+    //===========================================
+    //================view ======================
+    //===========================================
+    //test create view
+    var ListView = Backbone.View.extend({  
+        // el: $('div.test'),
+        tagName : 'div',  
+        className : 'sec',  
+        id : 'list',  
+        attributes : {  
+            style : 'color:red'  
+        },  
+        initialize: function () {
+            console.log('created a test view') ;  
+            this.render();
+        },
+        render : function() {  
+            this.el.innerHTML = 'Hi World!';  
+            document.body.appendChild(this.el);  
+        }  
+    });  
+    var listview = new ListView();  
 
+    //===========================================
+    //================router ====================
+    //===========================================
+    var AppRouter = Backbone.Router.extend({  
+        routes : {  
+            '' : 'main',  
+            'list' : 'list',  
+            'list/:id' : 'detail',  
+            '*other' : 'other'  
+        },  
+        main : function() {  
+            console.log('welcome') ;
+        },  
+        list: function () {
+            console.log('welcome to list page') ;
+        },
+        detail: function (id) {
+            console.log('welcome to detail page', id) ;
+        },
+        other: function (other) {
+            console.log('welcome to other page', other) ;
+        }
+    });  
+      
+    var router = new AppRouter();  
+    Backbone.history.start();  
 });
